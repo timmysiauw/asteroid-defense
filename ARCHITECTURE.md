@@ -242,6 +242,13 @@ Examples:
 
 This helps us avoid leaking sound and effect logic into core systems.
 
+Current implementation direction:
+
+- systems emit step-local events into an event array passed down by the game loop
+- the game loop accumulates those events across fixed simulation steps for the current render frame
+- renderer, audio, and UI integrations can consume that render-frame event buffer
+- the buffer is cleared after render
+
 ## Game Loop
 
 Use a fixed-step simulation loop.

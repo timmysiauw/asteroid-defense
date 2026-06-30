@@ -28,12 +28,113 @@ body {
 }
 
 .game-frame {
+  position: relative;
   display: grid;
+  gap: 12px;
   justify-items: center;
+  width: min(92vw, 720px);
+}
+
+.game-hud {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border: 1px solid rgba(208, 224, 242, 0.18);
+  border-radius: 14px;
+  background: rgba(7, 15, 28, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.hud-block {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.hud-label {
+  color: #8ea4bf;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hud-value {
+  color: #f4f8fd;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.hud-icon {
+  color: #d9f25b;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.game-modal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 6, 12, 0.52);
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
+}
+
+.game-modal[hidden] {
+  display: none;
+}
+
+.game-modal-card {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 16px;
+  padding: 28px 24px;
+  border: 1px solid rgba(214, 224, 237, 0.2);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(16, 27, 44, 0.98), rgba(7, 14, 25, 0.98));
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.game-modal-title {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+}
+
+.game-modal-body {
+  margin: 0;
+  color: #bfd0e4;
+  line-height: 1.5;
+}
+
+.game-modal-button {
+  justify-self: center;
+  min-width: 140px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #eef66d, #c4df3d);
+  color: #09111d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-modal-button:hover {
+  filter: brightness(1.03);
 }
 
 canvas {
-  width: min(92vw, 720px);
+  width: 100%;
   height: auto;
   border: 1px solid rgba(208, 224, 242, 0.25);
   border-radius: 18px;

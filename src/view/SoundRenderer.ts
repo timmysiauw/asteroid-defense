@@ -12,6 +12,12 @@ export class SoundRenderer {
     }
   }
 
+  suspend(): void {
+    if (this.audioContext?.state === 'running') {
+      void this.audioContext.suspend();
+    }
+  }
+
   play(events: GameEvent[]): void {
     if (events.length === 0) {
       return;
@@ -210,4 +216,3 @@ export class SoundRenderer {
     oscillator.stop(start + options.duration);
   }
 }
-

@@ -1,7 +1,13 @@
 import { CONFIG } from '../game/config';
 import type { GameEvent } from '../model/events';
 import type { AsteroidState, GameState } from '../model/GameState';
-import { getAsteroidRadius, randomAsteroidValue } from '../utils/asteroid';
+import {
+  getAsteroidRadius,
+  randomAsteroidSides,
+  randomAsteroidValue,
+  randomFloat,
+  randomRotationDeg
+} from '../utils/asteroid';
 
 export function updateAsteroidSpawnSystem(
   state: GameState,
@@ -31,11 +37,13 @@ function createAsteroid(id: number): AsteroidState {
     y: CONFIG.asteroidStartY,
     value,
     radius: getAsteroidRadius(value),
+    sides: randomAsteroidSides(),
+    rotationDeg: randomRotationDeg(),
     velocityX: randomInRange(CONFIG.asteroidVelocityXMin, CONFIG.asteroidVelocityXMax),
     velocityY: randomInRange(CONFIG.asteroidVelocityYMin, CONFIG.asteroidVelocityYMax)
   };
 }
 
 function randomInRange(min: number, max: number): number {
-  return min + Math.random() * (max - min);
+  return randomFloat(min, max);
 }

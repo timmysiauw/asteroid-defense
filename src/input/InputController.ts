@@ -3,6 +3,7 @@ export type FrameInput = {
   rotateRightHeld: boolean;
   fireJustPressed: boolean;
   nukeJustPressed: boolean;
+  toggleAudioJustPressed: boolean;
 };
 
 export class InputController {
@@ -10,6 +11,7 @@ export class InputController {
   private rotateRightHeld = false;
   private fireQueued = false;
   private nukeQueued = false;
+  private toggleAudioQueued = false;
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'ArrowLeft') {
@@ -61,19 +63,27 @@ export class InputController {
     this.rotateRightHeld = false;
     this.fireQueued = false;
     this.nukeQueued = false;
+    this.toggleAudioQueued = false;
+  }
+
+  queueToggleAudio(): void {
+    this.toggleAudioQueued = true;
   }
 
   getFrameInput(): FrameInput {
     const fireJustPressed = this.fireQueued;
     const nukeJustPressed = this.nukeQueued;
+    const toggleAudioJustPressed = this.toggleAudioQueued;
     this.fireQueued = false;
     this.nukeQueued = false;
+    this.toggleAudioQueued = false;
 
     return {
       rotateLeftHeld: this.rotateLeftHeld,
       rotateRightHeld: this.rotateRightHeld,
       fireJustPressed,
-      nukeJustPressed
+      nukeJustPressed,
+      toggleAudioJustPressed
     };
   }
 }

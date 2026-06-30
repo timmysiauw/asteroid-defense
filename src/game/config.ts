@@ -1,11 +1,13 @@
 const FIXED_DELTA_TIME_MS = 1000 / 60;
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 500;
 
 export const CONFIG = {
-  width: 1000,
-  height: 600,
-  groundY: 500,
+  width: CANVAS_WIDTH,
+  height: CANVAS_HEIGHT,
+  groundY: CANVAS_HEIGHT,
 
-  cannonX: 500,
+  cannonX: 400,
   cannonBaseRadius: 44,
   cannonBarrelLength: 88,
   cannonBarrelThickness: 16,
@@ -23,21 +25,21 @@ export const CONFIG = {
   asteroidMaxValue: 4,
   asteroidRadiusBase: 10,
   asteroidRadiusScale: 8,
-  asteroidVelocityXMin: -40,
-  asteroidVelocityXMax: 40,
-  asteroidVelocityYMin: 55,
-  asteroidVelocityYMax: 80,
+  asteroidVelocityXMin: -28,
+  asteroidVelocityXMax: 28,
+  asteroidVelocityYMin: 39,
+  asteroidVelocityYMax: 56,
   asteroidSplitSpeedMultiplier: 1.08,
   asteroidSplitAngleJitterDeg: 28,
   asteroidStartX: 420,
-  asteroidStartY: 80,
+  asteroidStartY: -110,
   asteroidSpawnMinX: 120,
   asteroidSpawnMaxX: 880,
-  buildingCountPerSide: 4,
-  buildingWidth: 54,
-  buildingGap: 18,
+  buildingCountPerSide: 8,
+  buildingMinWidth: 42,
+  buildingMaxWidth: 96,
   buildingMinHeight: 44,
-  buildingMaxHeight: 110,
+  buildingMaxHeight: 180,
   buildingSidePadding: 54,
   cannonClearHalfWidth: 86,
 

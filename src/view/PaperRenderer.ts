@@ -9,12 +9,7 @@ const BASE_FILL_COLOR = '#1f2f41';
 const BASE_STROKE_COLOR = '#f2f6fb';
 const BARREL_FILL_COLOR = '#dce7f5';
 const BARREL_STROKE_COLOR = '#f8fbff';
-const LASER_COLOR = '#7ee7ff';
-const ASTEROID_FILL_COLOR = '#b9c6d6';
-const ASTEROID_STROKE_COLOR = '#edf4fb';
-const ASTEROID_TEXT_COLOR = '#04101e';
-const BUILDING_FILL_COLOR = '#5d7187';
-const BUILDING_STROKE_COLOR = '#d6e0ed';
+const LASER_COLOR = '#ff3b30';
 
 export class PaperRenderer {
   private readonly background: paper.Path.Rectangle;
@@ -22,8 +17,17 @@ export class PaperRenderer {
   private readonly cannonBase: paper.Path;
   private readonly cannonBarrel: paper.Path;
   private readonly laserBeam: paper.Path.Line;
-  private readonly asteroidShapes = new Map<number, { body: paper.Path.Circle; label: paper.PointText }>();
-  private readonly buildingShapes = new Map<number, paper.Path.Rectangle>();
+  private readonly asteroidShapes = new Map<number, paper.Path>();
+  private readonly buildingShapes = new Map<
+    number,
+    {
+      shape: paper.Path.Rectangle;
+      width: number;
+      height: number;
+      fillColor: string;
+      strokeColor: string;
+    }
+  >();
 
   constructor(canvas: HTMLCanvasElement) {
     paper.setup(canvas);
@@ -36,8 +40,8 @@ export class PaperRenderer {
     });
 
     this.groundLine = new paper.Path.Line({
-      from: new paper.Point(0, CONFIG.groundY),
-      to: new paper.Point(CONFIG.width, CONFIG.groundY),
+      from: new paper.Point(0, CONFIG.height - 1),
+      to: new paper.Point(CONFIG.width, CONFIG.height - 1),
       strokeColor: GROUND_COLOR,
       strokeWidth: 2
     });
@@ -125,30 +129,61 @@ export class PaperRenderer {
   private syncBuildings(state: GameState): void {
     const activeIds = new Set(state.buildings.map((building) => building.id));
 
-    for (const [buildingId, shape] of this.buildingShapes.entries()) {
+    for (const [buildingId, entry] of this.buildingShapes.entries()) {
       if (!activeIds.has(buildingId)) {
-        shape.remove();
+        entry.shape.remove();
         this.buildingShapes.delete(buildingId);
       }
     }
 
     for (const building of state.buildings) {
       const topLeft = new paper.Point(building.x, CONFIG.groundY - building.height);
-      const existingShape = this.buildingShapes.get(building.id);
+      const existingEntry = this.buildingShapes.get(building.id);
 
-      if (existingShape === undefined) {
+      if (existingEntry === undefined) {
         const shape = new paper.Path.Rectangle({
           point: topLeft,
           size: new paper.Size(building.width, building.height),
-          fillColor: BUILDING_FILL_COLOR,
-          strokeColor: BUILDING_STROKE_COLOR,
+          fillColor: building.fillColor,
+          strokeColor: building.strokeColor,
           strokeWidth: 2
         });
-        this.buildingShapes.set(building.id, shape);
+        this.buildingShapes.set(building.id, {
+          shape,
+          width: building.width,
+          height: building.height,
+          fillColor: building.fillColor,
+          strokeColor: building.strokeColor
+        });
         continue;
       }
 
-      existingShape.position = new paper.Point(
+      const needsRebuild =
+        existingEntry.width !== building.width ||
+        existingEntry.height !== building.height ||
+        existingEntry.fillColor !== building.fillColor ||
+        existingEntry.strokeColor !== building.strokeColor;
+
+      if (needsRebuild) {
+        existingEntry.shape.remove();
+        const shape = new paper.Path.Rectangle({
+          point: topLeft,
+          size: new paper.Size(building.width, building.height),
+          fillColor: building.fillColor,
+          strokeColor: building.strokeColor,
+          strokeWidth: 2
+        });
+        this.buildingShapes.set(building.id, {
+          shape,
+          width: building.width,
+          height: building.height,
+          fillColor: building.fillColor,
+          strokeColor: building.strokeColor
+        });
+        continue;
+      }
+
+      existingEntry.shape.position = new paper.Point(
         building.x + building.width / 2,
         CONFIG.groundY - building.height / 2
       );
@@ -160,8 +195,7 @@ export class PaperRenderer {
 
     for (const [asteroidId, shape] of this.asteroidShapes.entries()) {
       if (!activeIds.has(asteroidId)) {
-        shape.body.remove();
-        shape.label.remove();
+        shape.remove();
         this.asteroidShapes.delete(asteroidId);
       }
     }
@@ -170,28 +204,32 @@ export class PaperRenderer {
       const existingShape = this.asteroidShapes.get(asteroid.id);
 
       if (existingShape === undefined) {
-        const body = new paper.Path.Circle({
-          center: new paper.Point(asteroid.x, asteroid.y),
-          radius: asteroid.radius,
-          fillColor: ASTEROID_FILL_COLOR,
-          strokeColor: ASTEROID_STROKE_COLOR,
-          strokeWidth: 2
-        });
-        const label = new paper.PointText({
-          point: new paper.Point(asteroid.x, asteroid.y + 5),
-          content: String(asteroid.value),
-          justification: 'center',
-          fillColor: ASTEROID_TEXT_COLOR,
-          fontSize: Math.max(14, asteroid.radius * 0.8),
-          fontWeight: 'bold'
-        });
-        this.asteroidShapes.set(asteroid.id, { body, label });
+        const body = new paper.Path.RegularPolygon(
+          new paper.Point(asteroid.x, asteroid.y),
+          asteroid.sides,
+          asteroid.radius
+        );
+        body.fillColor = new paper.Color(getAsteroidFillColor(asteroid.value));
+        body.strokeColor = new paper.Color(getAsteroidStrokeColor(asteroid.value));
+        body.strokeWidth = 2;
+        body.rotate(asteroid.rotationDeg);
+        this.asteroidShapes.set(asteroid.id, body);
         continue;
       }
 
-      existingShape.body.position = new paper.Point(asteroid.x, asteroid.y);
-      existingShape.label.point = new paper.Point(asteroid.x, asteroid.y + 5);
-      existingShape.label.content = String(asteroid.value);
+      existingShape.position = new paper.Point(asteroid.x, asteroid.y);
+      existingShape.fillColor = new paper.Color(getAsteroidFillColor(asteroid.value));
+      existingShape.strokeColor = new paper.Color(getAsteroidStrokeColor(asteroid.value));
     }
   }
+}
+
+function getAsteroidFillColor(value: number): string {
+  const lightness = 78 - (value - 1) * 12;
+  return `hsl(210 8% ${lightness}%)`;
+}
+
+function getAsteroidStrokeColor(value: number): string {
+  const lightness = 90 - (value - 1) * 8;
+  return `hsl(210 14% ${lightness}%)`;
 }

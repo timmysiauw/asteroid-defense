@@ -1,7 +1,7 @@
 import { CONFIG } from '../game/config';
 import type { GameEvent } from '../model/events';
 import type { AsteroidState, GameState } from '../model/GameState';
-import { getAsteroidRadius, randomInt } from '../utils/asteroid';
+import { getAsteroidRadius, randomAsteroidSides, randomInt, randomRotationDeg } from '../utils/asteroid';
 
 export function updateAsteroidHitResolutionSystem(
   state: GameState,
@@ -61,6 +61,7 @@ function createSplitAsteroid(
   value: number,
   directionBias: -1 | 1
 ): AsteroidState {
+  const deltaTimeSeconds = CONFIG.fixedDeltaTimeMs / 1000;
   const baseVelocityX = asteroid.velocityX * CONFIG.asteroidSplitSpeedMultiplier;
   const baseVelocityY = asteroid.velocityY * CONFIG.asteroidSplitSpeedMultiplier;
   const angleOffsetRad =
@@ -68,15 +69,20 @@ function createSplitAsteroid(
       Math.PI) /
     180;
   const rotatedVelocity = rotateVector(baseVelocityX, baseVelocityY, angleOffsetRad);
+  const velocityY = Math.max(40, rotatedVelocity.y);
+  const spawnX = asteroid.x + directionBias * 8;
+  const spawnY = asteroid.y;
 
   return {
     id: state.asteroidSpawn.nextAsteroidId++,
-    x: asteroid.x + directionBias * 8,
-    y: asteroid.y,
+    x: spawnX + rotatedVelocity.x * deltaTimeSeconds,
+    y: spawnY + velocityY * deltaTimeSeconds,
     value,
     radius: getAsteroidRadius(value),
+    sides: randomAsteroidSides(),
+    rotationDeg: randomRotationDeg(),
     velocityX: rotatedVelocity.x,
-    velocityY: Math.max(40, rotatedVelocity.y)
+    velocityY
   };
 }
 

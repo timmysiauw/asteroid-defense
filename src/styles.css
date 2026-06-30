@@ -1,9 +1,6 @@
 :root {
   color-scheme: dark;
   font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(71, 109, 156, 0.3), transparent 40%),
-    linear-gradient(180deg, #0d1624 0%, #050913 100%);
   color: #f3f7fc;
 }
 
@@ -11,19 +8,30 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  width: 100%;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(71, 109, 156, 0.3), transparent 40%),
+    linear-gradient(180deg, #0d1624 0%, #050913 100%);
 }
 
 #app {
+  width: 100%;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .app-shell {
-  display: grid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
   min-height: 100vh;
-  place-items: center;
   padding: 24px;
 }
 
@@ -32,11 +40,13 @@ body {
   display: grid;
   gap: 12px;
   justify-items: center;
-  width: min(92vw, 720px);
+  width: 100%;
+  margin-inline: auto;
 }
 
 .game-hud {
-  width: 100%;
+  width: min(96vw, 1200px);
+  max-width: calc(100vw - 48px);
   min-height: 48px;
   display: flex;
   align-items: center;
@@ -54,9 +64,16 @@ body {
   gap: 10px;
 }
 
+.hud-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .hud-label {
   color: #8ea4bf;
-  font-size: 0.85rem;
+  font-size: 1.08rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -70,8 +87,25 @@ body {
 
 .hud-icon {
   color: #d9f25b;
-  font-size: 1.4rem;
+  font-size: 2.15rem;
   line-height: 1;
+}
+
+.hud-audio-button {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(208, 224, 242, 0.18);
+  border-radius: 999px;
+  background: rgba(9, 18, 34, 0.92);
+  color: #f4f8fd;
+  font-size: 1.45rem;
+  cursor: pointer;
+}
+
+.hud-audio-button:hover {
+  border-color: rgba(208, 224, 242, 0.34);
 }
 
 .game-modal {
@@ -134,7 +168,9 @@ body {
 }
 
 canvas {
-  width: 100%;
+  display: block;
+  width: min(96vw, 1200px) !important;
+  max-width: calc(100vw - 48px);
   height: auto;
   border: 1px solid rgba(208, 224, 242, 0.25);
   border-radius: 18px;

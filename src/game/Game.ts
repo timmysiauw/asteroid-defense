@@ -1,10 +1,11 @@
 import { CONFIG } from './config';
-import { InputController } from '../input/InputController';
+import { InputController, type FrameInput } from '../input/InputController';
 import type { GameEvent } from '../model/events';
 import { createInitialGameState, type GameState } from '../model/GameState';
 import { updateAsteroidHitResolutionSystem } from '../systems/updateAsteroidHitResolutionSystem';
 import { updateAsteroidSystem } from '../systems/updateAsteroidSystem';
 import { updateAsteroidSpawnSystem } from '../systems/updateAsteroidSpawnSystem';
+import { updateAudioSystem } from '../systems/updateAudioSystem';
 import { updateCannonSystem } from '../systems/updateCannonSystem';
 import { updateLaserSystem } from '../systems/updateLaserSystem';
 import { updateNukeSystem } from '../systems/updateNukeSystem';
@@ -29,7 +30,7 @@ export class Game {
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLDivElement, modalRoot: HTMLDivElement) {
     this.renderer = new PaperRenderer(canvas);
-    this.hudRenderer = new HudRenderer(hudRoot);
+    this.hudRenderer = new HudRenderer(hudRoot, this.handleToggleAudio);
     this.modalRenderer = new ModalRenderer(modalRoot);
     this.soundRenderer = new SoundRenderer();
     this.inputController = new InputController();
@@ -48,6 +49,9 @@ export class Game {
       this.lastFrameTimeMs = frameTimeMs;
     }
 
+    const input = this.inputController.getFrameInput();
+    this.applyAudioInput(input);
+
     const frameDeltaMs = Math.min(frameTimeMs - this.lastFrameTimeMs, 100);
     this.lastFrameTimeMs = frameTimeMs;
     if (this.state.status === 'playing') {
@@ -57,7 +61,7 @@ export class Game {
     }
 
     while (this.accumulatorMs >= CONFIG.fixedDeltaTimeMs) {
-      this.step(CONFIG.fixedDeltaTimeMs);
+      this.step(CONFIG.fixedDeltaTimeMs, input);
       this.accumulatorMs -= CONFIG.fixedDeltaTimeMs;
     }
 
@@ -66,12 +70,11 @@ export class Game {
     this.animationFrameId = window.requestAnimationFrame(this.onAnimationFrame);
   };
 
-  private step(deltaTimeMs: number): void {
+  private step(deltaTimeMs: number, input: FrameInput): void {
     if (this.state.status !== 'playing') {
       return;
     }
 
-    const input = this.inputController.getFrameInput();
     const stepEvents: GameEvent[] = [];
 
     updateCannonSystem(this.state, input, deltaTimeMs);
@@ -107,14 +110,21 @@ export class Game {
   }
 
   private readonly startRound = (): void => {
-    this.state = createInitialGameState('playing');
+    this.state = createInitialGameState('playing', this.state.audioEnabled);
     this.inputController.reset();
-    this.soundRenderer.unlock();
+    if (this.state.audioEnabled) {
+      this.soundRenderer.unlock();
+    }
     this.accumulatorMs = 0;
     this.lastFrameTimeMs = null;
     this.frameEvents = [];
     this.modalRenderer.hide();
     this.render();
+  };
+
+  private readonly handleToggleAudio = (): void => {
+    this.inputController.queueToggleAudio();
+    this.soundRenderer.unlock();
   };
 
   private applyGameOver(events: GameEvent[]): void {
@@ -133,5 +143,15 @@ export class Game {
   private render(): void {
     this.renderer.render(this.state);
     this.hudRenderer.render(this.state);
+  }
+
+  private applyAudioInput(input: FrameInput): void {
+    updateAudioSystem(this.state, input);
+
+    if (this.state.audioEnabled) {
+      this.soundRenderer.unlock();
+    } else {
+      this.soundRenderer.suspend();
+    }
   }
 }

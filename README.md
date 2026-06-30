@@ -349,3 +349,14 @@ The first playable version should include:
 - Nuke deployment
 - Nuke recharge every minute
 - Restart button
+
+## TODO
+
+1. Difficulty ramping
+2. Skyline and building appearance
+3. Transient effects
+4. Precision control with hold-shift
+5. Portfolio readiness
+6. Pause and play
+7. Add building count to HUD
+8. Post on website

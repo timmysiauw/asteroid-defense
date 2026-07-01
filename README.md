@@ -359,4 +359,5 @@ The first playable version should include:
 5. Portfolio readiness
 6. Pause and play
 7. Add building count to HUD
-8. Post on website
+8. Shaking + flash transient effect for nukes
+9. Post on website
